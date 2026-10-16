@@ -1,8 +1,10 @@
-﻿using AccountStatements.Application.Statements;
+﻿using AccountStatements.Api.Swagger;
+using AccountStatements.Application.Statements;
 using AccountStatements.Application.Statements.Queries.GetCustomerStatements;
 using AccountStatements.Application.Statements.Queries.GetStatement;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace AccountStatements.Api.Controllers;
 
@@ -17,11 +19,14 @@ public class CustomersController : ControllerBase
         _mediator = mediator;
     }
 
-    /// <summary>Lists a customer's statements, optionally filtered by a month range.</summary>
+    /// <summary>Lists a customer statements, optionally filtered by a month range.</summary>
     [HttpGet]
     [ProducesResponseType(typeof(List<StatementDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [SwaggerResponseExample(200, typeof(StatementDtoListExample))]
+    [SwaggerResponseExample(400, typeof(ValidationErrorExample))]
+    [SwaggerResponseExample(404, typeof(NotFoundErrorExample))]
     public async Task<ActionResult<List<StatementDto>>> GetAll(
         Guid customerId,
         [FromQuery] int? fromYear,
@@ -40,6 +45,9 @@ public class CustomersController : ControllerBase
     [ProducesResponseType(typeof(StatementDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [SwaggerResponseExample(200, typeof(StatementDtoExample))]
+    [SwaggerResponseExample(400, typeof(ValidationErrorExample))]
+    [SwaggerResponseExample(404, typeof(NotFoundErrorExample))]
     public async Task<ActionResult<StatementDto>> GetOne(
         Guid customerId, int year, int month, CancellationToken ct)
     {

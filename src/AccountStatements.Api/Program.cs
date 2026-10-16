@@ -1,7 +1,9 @@
 ﻿using AccountStatements.Api.Middleware;
+using AccountStatements.Api.Swagger;
 using AccountStatements.Application;
 using AccountStatements.Infrastructure;
 using AccountStatements.Infrastructure.Persistence;
+using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,8 @@ builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options => options.ExampleFilters());
+builder.Services.AddSwaggerExamplesFromAssemblyOf<GenerateStatementsRequestExample>();
 
 var app = builder.Build();
 

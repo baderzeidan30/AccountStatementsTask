@@ -1,7 +1,9 @@
 ﻿using AccountStatements.Api.Contracts;
+using AccountStatements.Api.Swagger;
 using AccountStatements.Application.Statements.Commands.GenerateStatements;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace AccountStatements.Api.Controllers;
 
@@ -20,6 +22,9 @@ public class StatementsController : ControllerBase
     [HttpPost("generate")]
     [ProducesResponseType(typeof(GenerateStatementsResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [SwaggerRequestExample(typeof(GenerateStatementsRequest), typeof(GenerateStatementsRequestExample))]
+    [SwaggerResponseExample(200, typeof(GenerateStatementsResultExample))]
+    [SwaggerResponseExample(400, typeof(ValidationErrorExample))]
     public async Task<ActionResult<GenerateStatementsResult>> Generate(
         [FromBody] GenerateStatementsRequest request, CancellationToken ct)
     {
