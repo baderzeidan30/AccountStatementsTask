@@ -14,7 +14,7 @@ public class Statement
     public decimal TotalDebits { get; set; }
     public decimal ClosingBalance => OpeningBalance + TotalCredits - TotalDebits;
 
-    public string Body { get; set; } = default!;   // the HTML that was emailed
+    public string Body { get; set; } = default!;   // the HTML was emailed
     public DateTime GeneratedAtUtc { get; set; }
     public DateTime? EmailedAtUtc { get; set; }
     public EmailStatus EmailStatus { get; set; }

@@ -38,16 +38,27 @@ public class GenerateStatementsCommandHandler : IRequestHandler<GenerateStatemen
     {
         var periodStart = new DateTime(request.Year, request.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var periodEnd = periodStart.AddMonths(1);
+        var subject = $"Your account statement for {request.Year}-{request.Month:D2}";
 
         var customers = await _customers.GetAllAsync(ct);
         int generated = 0, skipped = 0, sent = 0, failed = 0;
 
         foreach (var customer in customers)
         {
-            // Idempotency: one statement per customer per month
-            if (await _statements.ExistsAsync(customer.Id, request.Year, request.Month, ct))
+            var existing = await _statements.GetForUpdateAsync(customer.Id, request.Year, request.Month, ct);
+
+            if (existing is not null)
             {
-                skipped++;
+                // Already delivered: nothing to do (idempotency)
+                if (existing.EmailStatus == EmailStatus.Sent)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                // Pending or Failed: resend the stored statement
+                if (await TrySendAsync(customer, existing, subject, ct)) sent++; else failed++;
+                await _unitOfWork.SaveChangesAsync(ct);
                 continue;
             }
 
@@ -74,26 +85,29 @@ public class GenerateStatementsCommandHandler : IRequestHandler<GenerateStatemen
             await _unitOfWork.SaveChangesAsync(ct);
             generated++;
 
-            try
-            {
-                var subject = $"Your account statement for {request.Year}-{request.Month:D2}";
-                await _emailSender.SendAsync(customer.Email, subject, statement.Body, ct);
-
-                statement.EmailStatus = EmailStatus.Sent;
-                statement.EmailedAtUtc = DateTime.UtcNow;
-                sent++;
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException)
-            {
-                // One failed email must not stop the other customers
-                _logger.LogError(ex, "Failed to email statement for customer {CustomerId}", customer.Id);
-                statement.EmailStatus = EmailStatus.Failed;
-                failed++;
-            }
-
+            if (await TrySendAsync(customer, statement, subject, ct)) sent++; else failed++;
             await _unitOfWork.SaveChangesAsync(ct);
         }
 
         return new GenerateStatementsResult(customers.Count, generated, skipped, sent, failed);
+    }
+
+    // Sends the email and updates the status on the entity. Never throws (except on cancellation).
+    private async Task<bool> TrySendAsync(Customer customer, Statement statement, string subject, CancellationToken ct)
+    {
+        try
+        {
+            await _emailSender.SendAsync(customer.Email, subject, statement.Body, ct);
+            statement.EmailStatus = EmailStatus.Sent;
+            statement.EmailedAtUtc = DateTime.UtcNow;
+            return true;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // One failed email must not stop the other customers
+            _logger.LogError(ex, "Failed to email statement for customer {CustomerId}", customer.Id);
+            statement.EmailStatus = EmailStatus.Failed;
+            return false;
+        }
     }
 }

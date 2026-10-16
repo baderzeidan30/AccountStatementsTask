@@ -20,6 +20,10 @@ public class StatementRepository : IStatementRepository
         _db.Statements.AsNoTracking()
             .FirstOrDefaultAsync(s => s.CustomerId == customerId && s.Year == year && s.Month == month, ct);
 
+    public Task<Statement?> GetForUpdateAsync(Guid customerId, int year, int month, CancellationToken ct) =>
+        _db.Statements
+            .FirstOrDefaultAsync(s => s.CustomerId == customerId && s.Year == year && s.Month == month, ct);
+
     public Task<List<Statement>> GetByCustomerAsync(
         Guid customerId, int? fromPeriod, int? toPeriod, CancellationToken ct)
     {
