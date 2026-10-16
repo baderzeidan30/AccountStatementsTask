@@ -19,11 +19,14 @@ builder.Services.AddSwaggerExamplesFromAssemblyOf<GenerateStatementsRequestExamp
 
 var app = builder.Build();
 
-// Create the SQLite database on first run
+// Create the SQLite database on first run and add sample data in Development
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+
+    if (app.Environment.IsDevelopment())
+        await DbSeeder.SeedAsync(db);
 }
 
 app.UseExceptionHandler();
