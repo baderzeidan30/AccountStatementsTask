@@ -27,6 +27,9 @@ public class MonthlyStatementJob : BackgroundService
             return;
         }
 
+        if (_configuration.GetValue("Scheduler:RunOnStartup", false))
+            await RunAsync(stoppingToken);
+
         while (!stoppingToken.IsCancellationRequested)
         {
             var now = DateTime.UtcNow;
@@ -77,3 +80,4 @@ public class MonthlyStatementJob : BackgroundService
         }
     }
 }
+

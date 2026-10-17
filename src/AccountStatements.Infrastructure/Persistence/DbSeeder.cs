@@ -16,7 +16,7 @@ public static class DbSeeder
         {
             Id = Guid.Parse("3f2b8c1e-7a4d-4e6b-9c1a-5d8e2f4b6a10"),
             FullName = "Ahmad Nasser",
-            Email = "ahmad.nasser@example.com"
+            Email = "baderzeidan30@gmail.com"
         };
         var layla = new Customer
         {
@@ -68,3 +68,6 @@ public static class DbSeeder
         Type = type
     };
 }
+
+
+
