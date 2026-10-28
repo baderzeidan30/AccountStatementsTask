@@ -43,6 +43,7 @@ public class GenerateStatementsCommandHandler : IRequestHandler<GenerateStatemen
         var customers = await _customers.GetAllAsync(ct);
         int generated = 0, skipped = 0, sent = 0, failed = 0;
 
+        customers = customers.Where(s => s.CustomerType == CustomerType.Credit).ToList();
         foreach (var customer in customers)
         {
             var existing = await _statements.GetForUpdateAsync(customer.Id, request.Year, request.Month, ct);

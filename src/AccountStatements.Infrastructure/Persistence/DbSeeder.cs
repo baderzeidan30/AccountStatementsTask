@@ -16,19 +16,22 @@ public static class DbSeeder
         {
             Id = Guid.Parse("3f2b8c1e-7a4d-4e6b-9c1a-5d8e2f4b6a10"),
             FullName = "Ahmad Nasser",
-            Email = "baderzeidan30@gmail.com"
+            Email = "baderzeidan30@gmail.com",
+            CustomerType=CustomerType.Credit
         };
         var layla = new Customer
         {
             Id = Guid.Parse("7c9e6679-7425-40de-944b-e07fc1f90ae7"),
             FullName = "Layla Haddad",
-            Email = "layla.haddad@example.com"
+            Email = "layla.haddad@example.com",
+            CustomerType = CustomerType.Debit
         };
         var omar = new Customer
         {
             Id = Guid.Parse("c56a4180-65aa-42ec-a945-5fd21dec0538"),
             FullName = "Omar Khalil",
-            Email = "omar.khalil@example.com"
+            Email = "omar.khalil@example.com",
+            CustomerType = CustomerType.Credit
         };
 
         db.Customers.AddRange(ahmad, layla, omar);
